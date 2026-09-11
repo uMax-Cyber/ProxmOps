@@ -6,49 +6,49 @@
 
 </div>
 
-# Proxmox Day-2 operatsiyalar vositasi
+# Proxmox day-2 operatsiyalar vositasi
 
 ![Demo](screenshots/demo.svg)
 [![CI](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml/badge.svg)](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml)
 
-Production muhitida sinovdan oʻtgan skriptlar va qoʻllanmalar — mustaqil (standalone) Proxmox VE nodelarida kundalik day-2 operatsiyalari uchun: cloud-init orqali virtual mashinalarni yaratish, disk hajmini oʻzgartirish, oltin shablonlarni boshqarish va tekshiruvga asoslangan ish oqimlari.
+Production muhitga tayyor skriptlar va qoʻllanmalar — mustaqil (standalone) Proxmox VE serverlarining kundalik ekspluatatsiyasi (day-2) uchun: cloud-init orqali VM yaratish, diskni kengaytirish, oltin shablonlar bilan ishlash va har bir amal oxirida tekshiruv oʻtkaziladigan ish oqimlari.
 
 ## Ichida nima bor
 
-### 🖥 Virtual mashina yaratish (cloud-init)
-- «Oltin yoʻl» boʻyicha klonlash oqimi (shablon → toʻliq klon → cloud-init → tekshirish)
-- QEMU guest-agent bilan Ubuntu 24.04 cloud-image shabloni yasovchi
-- Birinchi ishga tushirishda paketlarni oʻrnatish uchun vendor-snippet tizimi
-- cloudimg-override tuzatishi bilan SSH kalit + parol orqali autentifikatsiya sozlamasi
+### 🖥 VM yaratish (cloud-init)
+- Shablondan VM yaratishning toʻgʻri yoʻli (template → full clone → cloud-init → tekshirish)
+- QEMU guest-agent oʻrnatilgan Ubuntu 24.04 cloud-image shablonini yaratish
+- Birinchi ishga tushirishda kerakli paketlarni oʻrnatadigan vendor-snippet tizimi
+- SSH kalit va parol bilan kirishni sozlash, cloudimg-override muammosini hal qilish bilan
 
 ### 💾 Disk operatsiyalari
-- VM diskini toʻxtatmasdan (online) kengaytirish (gipervizor + mehmon tizimidagi partitsiya + fayl tizimi)
-- Cloud-image joylashuvi uchun `growpart` / `resize2fs` ketma-ketligi
-- LVM hamda ext4/xfs variantlari
+- VM ishlab turgan holida diskni kengaytirish (gipervizor, VM ichidagi partitsiya va fayl tizimi)
+- cloud-image disk tuzilishi uchun `growpart` / `resize2fs` ketma-ketligi
+- LVM va ext4/xfs variantlari
 
 ### ✅ «Avval tekshir» tamoyili
-Har bir amal quyidagi sxema boʻyicha bajariladi: **qil → tekshir → hisobot ber**. Skriptlar holatni soʻrab turadi, MAC-manzillarni ARP yozuvlari bilan solishtiradi va fayl tizimidagi oʻzgarishlarni tasdiqlaydi — shundan keyingina muvaffaqiyat deb e'lon qilinadi.
+Har bir amal shu tartibda bajariladi: **qil → tekshir → hisobot ber**. Skriptlar holatni soʻrab turadi, MAC-manzillarni ARP yozuvlari bilan solishtiradi va fayl tizimidagi oʻzgarishni oʻzi koʻrib tasdiqlaydi — shundan keyingina ish muvaffaqiyatli deb hisoblanadi.
 
 ## Texnologiyalar
-- Proxmox VE 9.x (mustaqil nodelar, klaster emas)
-- Ubuntu 24.04 LTS cloud-obl razilari
-- Bash + Python (faqat standart kutubxona, tashqi bogʻliqliksiz)
+- Proxmox VE 9.x (mustaqil serverlar, klaster emas)
+- Ubuntu 24.04 LTS cloud-image lar
+- Bash va Python (faqat standart kutubxona, tashqi bogʻliqlik yoʻq)
 
 ## Asosiy skriptlar
 
 | Skript | Vazifasi |
 |--------|----------|
-| `scripts/clone_vm.sh` | Shablondan cloud-init bilan toʻliq klonlash |
-| `scripts/resize_disk.sh` | Ikki bosqichli online disk kengaytirish (host + mehmon) |
-| `scripts/seed_template.sh` | Yangi nodeda oltin shablonni yaratish |
-| `scripts/verify_vm.sh` | Yaratilgandan keyingi tekshiruvlar roʻyxati |
+| `scripts/clone_vm.sh` | Shablondan cloud-init bilan toʻliq klon yaratish |
+| `scripts/resize_disk.sh` | Diskni ikki bosqichda, toʻxtatmasdan kengaytirish (host va guest tomonda) |
+| `scripts/seed_template.sh` | Yangi serverda oltin shablon tayyorlash |
+| `scripts/verify_vm.sh` | VM yaratilgach tekshiruvlar roʻyxatini oʻtkazish |
 
-## Amaliyotdagi tipik xatolar (real hodisalardan hujjatlashtirilgan)
+## Amaliyotdagi tipik xatolar (real voqealardan olingan)
 
-1. **LXC shabloni ≠ VM diski** — `.tar.zst` konteyner shablonlarini VM diski sifatida import qilish 135MB keraksiz ma'lumot yaratadi
-2. **Ping ga javob beradigan IP ≠ boʻsh IP** — tayinlashdan oldin albatta skanerlang; zich subnetlarda «jim» egalari boʻladi
-3. **cloudimg SSH override** — Ubuntu cloud-obl razilari `/etc/ssh/sshd_config.d/` ichida `PasswordAuthentication no` bilan keladi; faqat `cipassword` buni bekor qilmaydi
-4. **VM qayta yaratilganda SSH sozlamalari tiklanadi** — destroy+clone tsikli cloud-image standart sozlamalarini qaytaradi; har qayta yaratilgandan keyin SSH tuzatishini qayta qoʻllang
+1. **LXC shabloni — bu VM diski emas** — `.tar.zst` konteyner shablonini VM diski qilib import qilsangiz, 135MB lik ishlamaydigan «disk» paydo boʻladi
+2. **Ping ga javob beradi — bu IP boʻsh degani emas** — IP tayinlashdan oldin subnetni albatta skanerlang; zich subnetlarda ayrim IP lar band boʻlsa-da, koʻzga tashlanmaydi
+3. **cloudimg SSH cheklovi** — Ubuntu cloud-image lari `/etc/ssh/sshd_config.d/` ichida `PasswordAuthentication no` bilan keladi; `cipassword` yozishning oʻzi buni bekor qilmaydi
+4. **VM qayta yaratilganda SSH sozlamalari tiklanadi** — destroy+clone tsikli cloud-image standart sozlamalarini qaytarib yuboradi; har safar qayta yaratgach SSH tuzatishini yana bir marta qoʻllang
 
 ## Ishlatish
 
@@ -56,10 +56,10 @@ Har bir amal quyidagi sxema boʻyicha bajariladi: **qil → tekshir → hisobot 
 # Oltin shablondan VM klonlash
 ./scripts/clone_vm.sh --template 9000 --name webserver --ip 10.0.0.50
 
-# Diskni online kengaytirish (toʻxtatishsisiz)
+# Diskni toʻxtatmasdan kengaytirish
 ./scripts/resize_disk.sh --vmid 102 --disk scsi0 --size 50G
 
-# Yaratishni tekshirish
+# Yaratilgan VM ni tekshirish
 ./scripts/verify_vm.sh --vmid 102 --expected-ip 10.0.0.50
 ```
 
