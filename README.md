@@ -1,3 +1,5 @@
+[English](README.md) | [Русский](README.ru.md)
+
 # Proxmox Day-2 Ops Toolkit
 [![CI](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml/badge.svg)](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml)
 
