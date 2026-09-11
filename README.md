@@ -1,4 +1,5 @@
 # Proxmox Day-2 Ops Toolkit
+[![CI](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml/badge.svg)](https://github.com/uMax-Cyber/ProxmOps/actions/workflows/ci.yml)
 
 Production-ready scripts and runbooks for day-2 operations on standalone Proxmox VE nodes: VM provisioning via cloud-init, disk resizing, golden template management, and verification-first workflows.
 
